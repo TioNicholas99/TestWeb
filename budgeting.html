@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Planning - Ummra Tour and Travel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        /* Budget Planner Specific Styles */
+        .budget-planner {
+            background-color: #f8f9fa;
+            padding: 50px 0;
+        }
+        
+        .budget-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .budget-form {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .calculate-btn {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background-color: #162a60;
+        }
+        
+        .budget-results {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: none;
+        }
+        
+        .budget-results.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .results-header h3 {
+            font-size: 22px;
+            color: #1e3a8a;
+            margin: 0;
+        }
+        
+        .total-cost {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+        
+        .cost-breakdown {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .cost-item {
+            flex: 1;
+            min-width: 200px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .cost-item h4 {
+            margin-top: 0;
+            color: #444;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .cost-item p {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin: 0;
+        }
+        
+        .cost-item .cost-details {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .book-now-btn {
+            background-color: #1e7b1e;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .book-now-btn:hover {
+            background-color: #166116;
+        }
+        
+        .save-btn {
+            background-color: transparent;
+            color: #1e3a8a;
+            border: 1px solid #1e3a8a;
+            padding: 14px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .save-btn:hover {
+            background-color: #f0f4ff;
+        }
+        
+        .recommendations {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .recommendations h4 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .recommendations ul {
+            padding-left: 20px;
+        }
+        
+        .recommendations li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .budget-container {
+                padding: 0 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .cost-breakdown {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <img src="logo.jpg" alt="Ummra Logo">
+                <h1>Ummra Tour & Travel</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#about">About Us</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="index.html#packages">Packages</a></li>
+                <li><a href="#" class="active">Budget Planner</a></li>
+                <li><a href="index.html#gallery">Gallery</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1>Plan Your Pilgrimage Budget</h1>
+            <p>Calculate the estimated cost of your Umrah or Hajj journey with our interactive budget planner.</p>
+        </div>
+    </section>
+
+    <!-- Budget Planner Section -->
+    <section id="budget-planner" class="budget-planner section-padding">
+        <div class="container">
+            <div class="section-title">
+                <h2>Budget Planner</h2>
+                <p>Customize your journey and get an instant cost estimate</p>
+            </div>
+            
+            <div class="budget-container">
+                <!-- Budget Form -->
+                <div class="budget-form">
+                    <h3>Select Your Preferences</h3>
+                    <form id="budgetForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="journeyType">Journey Type</label>
+                                <select id="journeyType" name="journeyType">
+                                    <option value="umrah">Umrah</option>
+                                    <option value="hajj">Hajj</option>
+                                    <option value="umrahPlus">Umrah Plus (with Additional Cities)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="packageType">Package Type</label>
+                                <select id="packageType" name="packageType">
+                                    <option value="economy">Economy</option>
+                                    <option value="standard">Standard</option>
+                                    <option value="premium">Premium</option>
+                                    <option value="vip">VIP</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="departureDate">Departure Date</label>
+                                <input type="date" id="departureDate" name="departureDate" min="2025-04-12">
+                            </div>
+                            <div class="form-group">
+                                <label for="duration">Duration (Days)</label>
+                                <select id="duration" name="duration">
+                                    <option value="10">10 Days</option>
+                                    <option value="14">14 Days</option>
+                                    <option value="21">21 Days</option>
+                                    <option value="28">28 Days</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="customDurationGroup" style="display: none;">
+                                <label for="customDuration">Custom Duration (Days)</label>
+                                <input type="number" id="customDuration" name="customDuration" min="5" max="45" value="10">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="departureCity">Departure City</label>
+                                <select id="departureCity" name="departureCity">
+                                    <option value="jakarta">Jakarta</option>
+                                    <option value="surabaya">Surabaya</option>
+                                    <option value="bandung">Bandung</option>
+                                    <option value="medan">Medan</option>
+                                    <option value="makassar">Makassar</option>
+                                    <option value="bali">Bali</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="travelers">Number of Travelers</label>
+                                <input type="number" id="travelers" name="travelers" min="1" value="1">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="airline">Preferred Airline</label>
+                                <select id="airline" name="airline">
+                                    <option value="any">Any (Best Available)</option>
+                                    <option value="garuda">Garuda Indonesia</option>
+                                    <option value="saudia">Saudia Airlines</option>
+                                    <option value="emirates">Emirates</option>
+                                    <option value="etihad">Etihad Airways</option>
+                                    <option value="qatar">Qatar Airways</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="hotelCategory">Hotel Category</label>
+                                <select id="hotelCategory" name="hotelCategory">
+                                    <option value="3star">3-Star Hotels</option>
+                                    <option value="4star">4-Star Hotels</option>
+                                    <option value="5star">5-Star Hotels</option>
+                                    <option value="luxury">Luxury Hotels</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="roomType">Room Type</label>
+                                <select id="roomType" name="roomType">
+                                    <option value="double">Double Room</option>
+                                    <option value="triple">Triple Room</option>
+                                    <option value="quad">Quad Room</option>
+                                    <option value="suite">Suite</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="mealPlan">Meal Plan</label>
+                                <select id="mealPlan" name="mealPlan">
+                                    <option value="breakfast">Breakfast Only</option>
+                                    <option value="halfBoard">Half Board (Breakfast + Dinner)</option>
+                                    <option value="fullBoard">Full Board (All Meals)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transportType">Transportation in Saudi</label>
+                                <select id="transportType" name="transportType">
+                                    <option value="standard">Standard (Shared Bus)</option>
+                                    <option value="premium">Premium (Small Group Van)</option>
+                                    <option value="private">Private Vehicle</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="button" id="calculateBtn" class="calculate-btn">Calculate Estimated Cost</button>
+                    </form>
+                </div>
+                
+                <!-- Budget Results -->
+                <div class="budget-results" id="budgetResults">
+                    <div class="results-header">
+                        <h3>Your Estimated Budget</h3>
+                        <div class="total-cost" id="totalCost">$3,250 per person</div>
+                    </div>
+                    
+                    <div class="cost-breakdown">
+                        <div class="cost-item">
+                            <h4>Flights</h4>
+                            <p id="flightCost">$800</p>
+                            <div class="cost-details" id="flightDetails">Round Trip, Economy Class</div>
+                        </div>
+                        <div class="cost-item">
+                            <h4>Accommodation</h4>
+                            <p id="accommodationCost">$1,200</p>
+                            <div class="cost-details" id="accommodationDetails">9 nights, 4-Star Hotels</div>
+                        </div>
+                        <div class="cost-item">
+                            <h4>Transportation</h4>
+                            <p id="transportCost">$350</p>
+                            <div class="cost-details" id="transportDetails">Airport transfers, Makkah-Madinah</div>
+                        </div>
+                    </div>
+                    
+                    <div class="cost-breakdown" style="margin-top: 20px;">
+                        <div class="cost-item">
+                            <h4>Visa & Fees</h4>
+                            <p id="visaCost">$300</p>
+                            <div class="cost-details" id="visaDetails">Umrah Visa & Processing</div>
+                        </div>
+                        <div class="cost-item">
+                            <h4>Meals</h4>
+                            <p id="mealsCost">$400</p>
+                            <div class="cost-details" id="mealsDetails">Half Board Plan</div>
+                        </div>
+                        <div class="cost-item">
+                            <h4>Other Expenses</h4>
+                            <p id="otherCost">$200</p>
+                            <div class="cost-details" id="otherDetails">Guide, Tips, Misc.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendations">
+                        <h4>Recommendations:</h4>
+                        <ul id="recommendationsList">
+                            <li>Consider upgrading to a Premium package for more comfort during your journey.</li>
+                            <li>Book at least 3 months in advance for better rates.</li>
+                            <li>Adding 1-2 days in Madinah is recommended for a more fulfilling experience.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="book-now-btn" id="bookNowBtn">Proceed to Booking</button>
+                        <button class="save-btn" id="saveQuoteBtn"><i class="fas fa-save"></i> Save Quote</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-col footer-about">
+                    <h3>About Ummra</h3>
+                    <p>Ummra Tour and Travel is committed to providing exceptional Umrah and Hajj services with a focus on spiritual guidance, comfort, and unforgettable experiences for all pilgrims.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html#home">Home</a></li>
+                        <li><a href="index.html#about">About Us</a></li>
+                        <li><a href="index.html#services">Services</a></li>
+                        <li><a href="index.html#packages">Packages</a></li>
+                        <li><a href="#">Budget Planner</a></li>
+                        <li><a href="index.html#gallery">Gallery</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Our Services</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Umrah Packages</a></li>
+                        <li><a href="#">Hajj Packages</a></li>
+                        <li><a href="#">Visa Processing</a></li>
+                        <li><a href="#">Hotel Booking</a></li>
+                        <li><a href="#">Transportation</a></li>
+                        <li><a href="#">City Tours</a></li>
+                        <li><a href="#">Islamic Tours</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col footer-newsletter">
+                    <h3>Newsletter</h3>
+                    <p>Subscribe to our newsletter to receive updates, special offers, and valuable information.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Your Email Address">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Ummra Tour and Travel. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script> <!-- kalau file eksternal -->
+
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navMenu = document.querySelector('.nav-menu');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+        
+        // Custom Duration Toggle
+        const durationSelect = document.getElementById('duration');
+        const customDurationGroup = document.getElementById('customDurationGroup');
+        
+        durationSelect.addEventListener('change', () => {
+            if (durationSelect.value === 'custom') {
+                customDurationGroup.style.display = 'block';
+            } else {
+                customDurationGroup.style.display = 'none';
+            }
+        });
+        
+        // Calculate Budget
+        const calculateBtn = document.getElementById('calculateBtn');
+        const budgetResults = document.getElementById('budgetResults');
+        
+        calculateBtn.addEventListener('click', () => {
+            // Get form values
+            const journeyType = document.getElementById('journeyType').value;
+            const packageType = document.getElementById('packageType').value;
+            const duration = document.getElementById('duration').value === 'custom' 
+                ? document.getElementById('customDuration').value 
+                : document.getElementById('duration').value;
+            const travelers = document.getElementById('travelers').value;
+            const airline = document.getElementById('airline').value;
+            const hotelCategory = document.getElementById('hotelCategory').value;
+            const roomType = document.getElementById('roomType').value;
+            const mealPlan = document.getElementById('mealPlan').value;
+            const transportType = document.getElementById('transportType').value;
+            
+            // Calculate base costs (this is simplified - in a real app you'd have a more complex pricing model)
+            let baseCost = 0;
+            let flightCost = 0;
+            let accommodationCost = 0;
+            let transportCost = 0;
+            let visaCost = 0;
+            let mealsCost = 0;
+            let otherCost = 0;
+            
+            // Journey type basic costs
+            if (journeyType === 'umrah') {
+                baseCost = 1500;
+            } else if (journeyType === 'hajj') {
+                baseCost = 4500;
+            } else if (journeyType === 'umrahPlus') {
+                baseCost = 2000;
+            }
+            
+            // Package multipliers
+            let packageMultiplier = 1;
+            if (packageType === 'standard') packageMultiplier = 1.2;
+            if (packageType === 'premium') packageMultiplier = 1.5;
+            if (packageType === 'vip') packageMultiplier = 2;
+            
+            // Hotel costs
+            let hotelBasePrice = 50; // per night
+            if (hotelCategory === '4star') hotelBasePrice = 80;
+            if (hotelCategory === '5star') hotelBasePrice = 120;
+            if (hotelCategory === 'luxury') hotelBasePrice = 200;
+            
+            // Room type multipliers
+            let roomMultiplier = 1;
+            if (roomType === 'triple') roomMultiplier = 0.8;
+            if (roomType === 'quad') roomMultiplier = 0.7;
+            if (roomType === 'suite') roomMultiplier = 1.5;
+            
+            // Airline costs
+            let airlineMultiplier = 1;
+            if (airline === 'garuda') airlineMultiplier = 1.2;
+            if (airline === 'emirates') airlineMultiplier = 1.3;
+            if (airline === 'etihad') airlineMultiplier = 1.25;
+            if (airline === 'qatar') airlineMultiplier = 1.35;
+            
+            // Transportation costs
+            let transportBasePrice = 200;
+            if (transportType === 'premium') transportBasePrice = 350;
+            if (transportType === 'private') transportBasePrice = 600;
+            
+            // Meal costs
+            let mealBasePrice = 15; // per day
+            if (mealPlan === 'halfBoard') mealBasePrice = 25;
+            if (mealPlan === 'fullBoard') mealBasePrice = 40;
+            
+            // Calculate individual components
+            flightCost = Math.round(600 * airlineMultiplier);
+            accommodationCost = Math.round(hotelBasePrice * parseInt(duration) * roomMultiplier);
+            transportCost = Math.round(transportBasePrice * (parseInt(duration) / 10));
+            
+            visaCost = journeyType === 'hajj' ? 450 : 300;
+            mealsCost = Math.round(mealBasePrice * parseInt(duration));
+            otherCost = Math.round((baseCost * packageMultiplier * 0.1));
+            
+            // Calculate total
+            const totalCost = Math.round((flightCost + accommodationCost + transportCost + visaCost + mealsCost + otherCost) * packageMultiplier);
+            
+            // Update the UI
+            document.getElementById('totalCost').textContent = `$${totalCost.toLocaleString()} per person`;
+            document.getElementById('flightCost').textContent = `$${flightCost.toLocaleString()}`;
+            document.getElementById('accommodationCost').textContent = `$${accommodationCost.toLocaleString()}`;
+            document.getElementById('transportCost').textContent = `$${transportCost.toLocaleString()}`;
+            document.getElementById('visaCost').textContent = `$${visaCost.toLocaleString()}`;
+            document.getElementById('mealsCost').textContent = `$${mealsCost.toLocaleString()}`;
+            document.getElementById('otherCost').textContent = `$${otherCost.toLocaleString()}`;
+            
+            // Update details
+            const hotelCategoryText = {
+                '3star': '3-Star',
+                '4star': '4-Star',
+                '5star': '5-Star',
+                'luxury': 'Luxury'
+            };
+            
+            const airlineText = {
+                'any': 'Best Available',
+                'garuda': 'Garuda Indonesia',
+                'saudia': 'Saudia Airlines',
+                'emirates': 'Emirates',
+                'etihad': 'Etihad Airways',
+                'qatar': 'Qatar Airways'
+            };
+            
+            const mealPlanText = {
+                'breakfast': 'Breakfast Only',
+                'halfBoard': 'Half Board (B+D)',
+                'fullBoard': 'Full Board (All Meals)'
+            };
+            
+            const transportTypeText = {
+                'standard': 'Shared Bus',
+                'premium': 'Small Group Van',
+                'private': 'Private Vehicle'
+            };
+            
+            document.getElementById('flightDetails').textContent = `Round Trip, ${airlineText[airline]}`;
+            document.getElementById('accommodationDetails').textContent = `${duration} nights, ${hotelCategoryText[hotelCategory]} Hotels`;
+            document.getElementById('transportDetails').textContent = `${transportTypeText[transportType]}, All Transfers`;
+            document.getElementById('visaDetails').textContent = `${journeyType.charAt(0).toUpperCase() + journeyType.slice(1)} Visa & Processing`;
+            document.getElementById('mealsDetails').textContent = `${mealPlanText[mealPlan]}`;
+            document.getElementById('otherDetails').textContent = 'Guide, Tips, Misc.';
+            
+            // Generate recommendations
+            const recommendationsList = document.getElementById('recommendationsList');
+            recommendationsList.innerHTML = '';
+            
+            // Add season-based recommendation
+            const departureDate = new Date(document.getElementById('departureDate').value);
+            const month = departureDate.getMonth();
+            
+            let seasonRec = '';
+            if (month >= 3 && month <= 5) { // Spring
+                seasonRec = 'Spring is a popular time for Umrah. Consider booking well in advance.';
+            } else if (month >= 6 && month <= 8) { // Summer
+                seasonRec = 'Summer can be extremely hot in Saudi Arabia. Pack appropriate clothing and stay hydrated.';
+            } else if (month >= 9 && month <= 11) { // Fall
+                seasonRec = 'Fall offers pleasant weather in Saudi Arabia, making it ideal for Umrah.';
+            } else { // Winter
+                seasonRec = 'Winter is peak season. Book early and expect higher prices.';
+            }
+            
+            // Add recommendations based on selections
+            const recommendations = [
+                seasonRec,
+                packageType === 'economy' ? 'Consider upgrading to a Standard package for more comfort during your journey.' : '',
+                hotelCategory === '3star' ? 'A 4-Star hotel offers better proximity to the Haram at a moderate price increase.' : '',
+                mealPlan === 'breakfast' ? 'Half Board meal plan provides better value and convenience during your stay.' : '',
+                parseInt(duration) < 14 ? 'Adding a few more days to your journey would allow a more relaxed pace of worship.' : '',
+                'Book at least 3 months in advance for better rates and availability.',
+                'Consider adding Ziarah (historical sites visits) to enrich your spiritual journey.'
+            ];
+            
+            recommendations.filter(r => r).forEach(rec => {
+                const li = document.createElement('li');
+                li.textContent = rec;
+                recommendationsList.appendChild(li);
+            });
+            
+            // Show results
+            budgetResults.classList.add('active');
+            
+            // Scroll to results
+            budgetResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        
+        // Book Now Button
+        document.getElementById('bookNowBtn').addEventListener('click', () => {
+            alert('Thank you for your interest! A booking specialist will contact you shortly to finalize your journey details.');
+            // In a real application, this would redirect to a booking page or form
+        });
+        
+        // Save Quote Button
+        document.getElementById('saveQuoteBtn').addEventListener('click', () => {
+            alert('Your personalized quote has been saved! You can access it anytime from your account or via the email we just sent you.');
+            // In a real application, this would save the quote to user's account or send via email
+        });
+        
+        // Set min date to today
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const minDate = tomorrow.toISOString().split('T')[0];
+        document.getElementById('departureDate').setAttribute('min', minDate);
+        document.getElementById('departureDate').value = minDate;
+        
+        // Sticky Header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            header.classList.toggle('sticky', window.scrollY > 0);
+        });
+    </script>
+</body>
+</html>
